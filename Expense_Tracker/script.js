@@ -11,46 +11,49 @@ const sortBy = document.getElementById("sortBy");
 const submitBtn = document.getElementById("submitBtn");
 const expenseList = document.getElementById("expenseList");
 
+const totalExpenses = document.getElementById("totalExpenses");
+const categoryTotals = document.getElementById("categoryTotals");
+const highestCategory = document.getElementById("highestCategory");
+
+const loadingText = document.getElementById("loadingText");
+
 function validateInputs() {
 
     let isValid = true;
 
-    document.getElementById("titleError").textContent = "";
-    document.getElementById("amountError").textContent = "";
-    document.getElementById("categoryError").textContent = "";
-    document.getElementById("dateError").textContent = "";
+    titleError.textContent = "";
+    amountError.textContent = "";
+    categoryError.textContent = "";
+    dateError.textContent = "";
 
     if (title.value.trim() === "") {
-        document.getElementById("titleError").textContent = "Title is required";
+        titleError.textContent = "Title is required";
         isValid = false;
     }
 
     if (amount.value === "" || Number(amount.value) <= 0) {
-        document.getElementById("amountError").textContent = "Enter a valid amount";
+        amountError.textContent = "Enter a valid amount";
         isValid = false;
     }
 
     if (!category.value) {
-        document.getElementById("categoryError").textContent = "Please select a category";
+        categoryError.textContent = "Select a category";
         isValid = false;
     }
 
-    if (date.value === "") {
-        document.getElementById("dateError").textContent = "Please choose a date";
+    if (!date.value) {
+        dateError.textContent = "Choose a date";
         isValid = false;
     }
 
     return isValid;
 }
 
-
 submitBtn.addEventListener("click", function (e) {
 
     e.preventDefault();
 
-    if (!validateInputs()) {
-        return;
-    }
+    if (!validateInputs()) return;
 
     const expense = {
         id: Date.now(),
@@ -60,13 +63,24 @@ submitBtn.addEventListener("click", function (e) {
         date: date.value
     };
 
-    expenses.push(expense);
+    loadingText.style.display = "block";
 
-    renderExpenses();
+    submitBtn.disabled = true;
 
-    clearForm();
+    setTimeout(() => {
+
+        expenses.push(expense);
+
+        renderExpenses();
+        updateSummary();
+        clearForm();
+
+        loadingText.style.display = "none";
+
+        submitBtn.disabled = false;
+
+    }, 1000);
 });
-
 
 function renderExpenses() {
 
@@ -81,19 +95,17 @@ function renderExpenses() {
     }
 
     if (sortBy.value === "amount") {
-
         processedExpenses.sort((a, b) => b.amount - a.amount);
-
     } 
     else {
-
         processedExpenses.sort(
             (a, b) => new Date(b.date) - new Date(a.date)
         );
     }
 
     if (processedExpenses.length === 0) {
-        expenseList.innerHTML = "<p>No expenses found.</p>";
+        expenseList.innerHTML =
+            "<p class='text-muted'>No expenses found.</p>";
         return;
     }
 
@@ -126,6 +138,7 @@ function deleteExpense(id) {
     expenses = expenses.filter(exp => exp.id !== id);
 
     renderExpenses();
+    updateSummary();
 }
 
 function clearForm() {
@@ -134,6 +147,45 @@ function clearForm() {
     amount.value = "";
     category.value = "";
     date.value = "";
+}
+
+function updateSummary() {
+
+    const total = expenses.reduce(
+        (sum, exp) => sum + exp.amount, 0
+    );
+
+    totalExpenses.textContent = total;
+
+    const totals = {};
+
+    expenses.forEach(exp => {
+        totals[exp.category] =
+            (totals[exp.category] || 0) + exp.amount;
+    });
+
+    categoryTotals.innerHTML = "";
+
+    for (let cat in totals) {
+
+        const p = document.createElement("p");
+        p.textContent = `${cat}: ₹${totals[cat]}`;
+
+        categoryTotals.appendChild(p);
+    }
+
+    let max = 0;
+    let highest = "None";
+
+    for (let cat in totals) {
+
+        if (totals[cat] > max) {
+            max = totals[cat];
+            highest = cat;
+        }
+    }
+
+    highestCategory.textContent = highest;
 }
 
 filterCategory.addEventListener("change", renderExpenses);
