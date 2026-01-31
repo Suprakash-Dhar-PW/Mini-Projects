@@ -5,10 +5,13 @@ const amount = document.getElementById("amount");
 const category = document.getElementById("category");
 const date = document.getElementById("date");
 
+const filterCategory = document.getElementById("filterCategory");
+const sortBy = document.getElementById("sortBy");
+
 const submitBtn = document.getElementById("submitBtn");
 const expenseList = document.getElementById("expenseList");
 
-function validateInputs(){
+function validateInputs() {
 
     let isValid = true;
 
@@ -17,22 +20,22 @@ function validateInputs(){
     document.getElementById("categoryError").textContent = "";
     document.getElementById("dateError").textContent = "";
 
-    if(title.value.trim() === ""){
+    if (title.value.trim() === "") {
         document.getElementById("titleError").textContent = "Title is required";
         isValid = false;
     }
 
-    if(amount.value === "" || Number(amount.value) <= 0){
+    if (amount.value === "" || Number(amount.value) <= 0) {
         document.getElementById("amountError").textContent = "Enter a valid amount";
         isValid = false;
     }
 
-    if(!category.value){
+    if (!category.value) {
         document.getElementById("categoryError").textContent = "Please select a category";
         isValid = false;
     }
 
-    if(date.value === ""){
+    if (date.value === "") {
         document.getElementById("dateError").textContent = "Please choose a date";
         isValid = false;
     }
@@ -41,13 +44,13 @@ function validateInputs(){
 }
 
 
-submitBtn.addEventListener("click", function(e){
+submitBtn.addEventListener("click", function (e) {
 
-    e.preventDefault(); 
+    e.preventDefault();
 
-    if(!validateInputs()){
+    if (!validateInputs()) {
         return;
-    } 
+    }
 
     const expense = {
         id: Date.now(),
@@ -65,20 +68,41 @@ submitBtn.addEventListener("click", function(e){
 });
 
 
-function renderExpenses(){
+function renderExpenses() {
 
     expenseList.innerHTML = "";
 
-    if(expenses.length === 0){
-        expenseList.innerHTML = "<p>No expenses added yet.</p>";
+    let processedExpenses = [...expenses];
+
+    if (filterCategory.value !== "All") {
+        processedExpenses = processedExpenses.filter(
+            exp => exp.category === filterCategory.value
+        );
+    }
+
+    if (sortBy.value === "amount") {
+
+        processedExpenses.sort((a, b) => b.amount - a.amount);
+
+    } 
+    else {
+
+        processedExpenses.sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+        );
+    }
+
+    if (processedExpenses.length === 0) {
+        expenseList.innerHTML = "<p>No expenses found.</p>";
         return;
     }
 
-    expenses.forEach(exp => {
+    processedExpenses.forEach(exp => {
 
         const div = document.createElement("div");
 
-        div.className = "border rounded p-2 mb-2 d-flex justify-content-between align-items-center";
+        div.className =
+            "border rounded p-2 mb-2 d-flex justify-content-between align-items-center";
 
         div.innerHTML = `
             <div>
@@ -97,17 +121,20 @@ function renderExpenses(){
 }
 
 
-function deleteExpense(id){
+function deleteExpense(id) {
 
     expenses = expenses.filter(exp => exp.id !== id);
 
     renderExpenses();
 }
 
-function clearForm(){
+function clearForm() {
 
     title.value = "";
     amount.value = "";
     category.value = "";
     date.value = "";
 }
+
+filterCategory.addEventListener("change", renderExpenses);
+sortBy.addEventListener("change", renderExpenses);
