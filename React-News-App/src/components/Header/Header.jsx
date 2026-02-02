@@ -4,7 +4,7 @@ export const Header = () => {
       <nav className="navbar navbar-expand-lg bg-body-tertiary "data-bs-theme="dark">
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
-            Navbar
+            <span className="badge bg-light text-dark fs-4">React News App</span>
           </a>
           <button
             className="navbar-toggler"
