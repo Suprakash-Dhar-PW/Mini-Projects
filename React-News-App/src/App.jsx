@@ -1,12 +1,10 @@
 import './App.css'
-import { Header } from './components/Header/Header';
-import { NewsList } from './components/NewsList/NewsList';
+import Home from './pages/Home'
 function App() {
 
   return (
     <>
-      <Header />
-      <NewsList />
+      <Home/>
     </>
   )
 }

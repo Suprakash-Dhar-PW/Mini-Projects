@@ -1,19 +1,21 @@
-import { useEffect, useState } from "react";
+import NewsCard from "../NewsCard/NewsCard";
 
-export const NewsList = () => {
-  const [articles, setArticles] = useState([]);
-
-  useEffect(() => {
-    let url = `https://gnews.io/api/v4/top-headlines?category=general&lang=en&apikey=${import.meta.env.VITE_API_KEY}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => setArticles(data.articles));
-  }, []);
+const NewsList = ({ articles }) => {
   return (
-    <>
+    <div className="container">
       <h2 className="text-center my-4">
         Latest <span className="badge bg-danger">News</span>
       </h2>
-    </>
+
+      <div className="row">
+        {articles.map((article, index) => (
+          <div key={index} className="col-md-4 mb-4">
+            <NewsCard article={article} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
+
+export default NewsList;
